@@ -1,9 +1,9 @@
-import dto.MeasurementResponse;
-import dto.MeasurementsDTO;
+import dto.MeasurementDTO;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -11,20 +11,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Client {
+
+
+
+
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
-        String nameSensor = "Sensor1";
+        String nameSensor = "Sensor100";
         registrationSensor(nameSensor, restTemplate);
         Random random = new Random();
         Double maxTemperature = 55.0;
         Double minTemperature = -35.0;
-        for(int i =0; i <100; i++){
+        for(int i =0; i <1000; i++){
             addMeasurement(nameSensor,
                     random.nextDouble()*(maxTemperature+Math.abs(minTemperature))
                             -maxTemperature,
                     random.nextBoolean(),
                     restTemplate);
         }
+        drawXYChart(getTemperature(restTemplate));
 
     }
 
@@ -35,7 +40,6 @@ public class Client {
         HttpEntity<Map<String, String>> request = new HttpEntity<>(jsonToSen);
         String response = restTemplate.postForObject(url, request, String.class);
         System.out.println(response);
-        drawXYChart(getTemperature(restTemplate));
 
     }
 
@@ -54,11 +58,10 @@ public class Client {
 
     public static List<Double> getTemperature(RestTemplate restTemplate){
         String url = "http://localhost:8080/measurements";
-        MeasurementResponse jsonResponse = restTemplate.getForObject(url,MeasurementResponse.class);
-        if(jsonResponse == null ){
-            return Collections.emptyList();
-        }
-        return jsonResponse.getList().stream().map(MeasurementsDTO::getValue).collect(Collectors.toList());
+        ResponseEntity<MeasurementDTO[]> responseEntity = restTemplate.getForEntity(url,MeasurementDTO[].class);
+        MeasurementDTO[] measurements = responseEntity.getBody();
+        return Arrays.stream(measurements).map(MeasurementDTO::getValue).collect(Collectors.toList());
+
     }
 
     private static void drawXYChart(List<Double> temperatures){

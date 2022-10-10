@@ -1,12 +1,14 @@
 package dto;
 
-public class MeasurementsDTO {
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+
+public class MeasurementDTO {
     private Double value;
     private Boolean raining;
     private SensorDTO sensor;
 
-    public MeasurementsDTO() {
-    }
+
 
     public Double getValue() {
         return value;
@@ -30,5 +32,14 @@ public class MeasurementsDTO {
 
     public void setSensor(SensorDTO sensor) {
         this.sensor = sensor;
+    }
+
+    @Override
+    public String toString() {
+        return "MeasurementDTO{" +
+                "value=" + value +
+                ", raining=" + raining +
+                ", sensor=" + sensor +
+                '}';
     }
 }
